@@ -4,107 +4,41 @@ import sublime
 import sublime_plugin
 
 
-class InsertFilePathCommand(sublime_plugin.TextCommand):
+def get_relative_path_to_git_repo(file_name):
+    current_dir = os.path.dirname(file_name)
+    while True:
+        if '.git' in os.listdir(current_dir):
+            relative_path = os.path.relpath(file_name, current_dir)
+            return relative_path, True
+        elif current_dir == '/':
+            return current_dir, False
+        current_dir = os.path.dirname(current_dir)
 
-    def run(self, edit):
-        file_path = self.view.file_name()
-        replace_text_in_selections(self.view, edit, file_path)
-
-    def is_enabled(self):
-        return bool(self.view.file_name() and len(self.view.file_name()) > 0)
-
-
-class InsertRelativePathCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        projectFolders = self.view.window().folders()
-        self.path = self.view.file_name()
-        for folder in projectFolders:
-            if folder in self.view.file_name():
-                self.path = self.path.replace(folder, '')
-                break
-        replace_text_in_selections(self.view, edit, self.path)
-
-    def is_enabled(self):
-        if self.view.window().folders():
-            return bool(self.view.file_name())
-        return False
-
-
-class InsertFileNameCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        file_name = os.path.basename(self.view.file_name())
-        replace_text_in_selections(self.view, edit, file_name)
-
-    def is_enabled(self):
-        return bool(self.view.file_name() and len(self.view.file_name()) > 0)
-
-
-class InsertFileDirectoryCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        file_directory = os.path.dirname(self.view.file_name())
-        replace_text_in_selections(self.view, edit, file_directory)
-
-    def is_enabled(self):
-        return bool(self.view.file_name() and len(self.view.file_name()) > 0)
-
-
-class InsertRelativeDirectoryCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        projectFolders = self.view.window().folders()
-        self.directory = os.path.dirname(self.view.file_name())
-        for folder in projectFolders:
-            if folder in self.view.file_name():
-                self.directory = self.directory.replace(folder, '')
-                break
-        replace_text_in_selections(self.view, edit, self.directory)
-
-    def is_enabled(self):
-        if self.view.window().folders():
-            return bool(self.view.file_name())
-        return False
-
-
-class CopyFileNameCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        file_name = os.path.basename(self.view.file_name())
-        sublime.set_clipboard(file_name)
-        sublime.status_message("Copied file name: %s" % file_name)
-
-    def is_enabled(self):
-        return bool(self.view.file_name() and len(self.view.file_name()) > 0)
-
-
-class CopyFileDirectoryCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        file_directory = os.path.dirname(self.view.file_name())
-        sublime.set_clipboard(file_directory)
-        sublime.status_message("Copied file directory: %s" % file_directory)
-
-    def is_enabled(self):
-        return bool(self.view.file_name() and len(self.view.file_name()) > 0)
 
 class CopyRelativePathCommand(sublime_plugin.TextCommand):
-
     def run(self, edit):
-        projectFolders = self.view.window().folders()
-        self.path = self.view.file_name()
-        for folder in projectFolders:
-            if folder in self.view.file_name():
-                self.path = self.path.replace(folder, '')[1:]
-                break
-        sublime.set_clipboard(self.path)
-        sublime.status_message("Copied file directory: %s" % self.path)
+        relative_path, found = get_relative_path_to_git_repo(self.view.file_name())
+        sublime.set_clipboard(relative_path)
+        if found:
+            sublime.set_clipboard(relative_path)
+        else:
+            sublime.status_message("Could not find parent git repo. Copied file path: %s" % relative_path)
+        return
 
     def is_enabled(self):
         return bool(self.view.file_name() and len(self.view.file_name()) > 0)
 
-def replace_text_in_selections(view, edit, text):
-    """Replace every selection with the passed text"""
-    for region in view.sel():
-        view.replace(edit, region, text)
+
+class CopyRelativePathWithLineNumCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        relative_path, found = get_relative_path_to_git_repo(self.view.file_name())
+        line_num = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
+        relative_path_with_line_num = '%s:%s' % (relative_path, line_num)
+        if found:
+            sublime.set_clipboard(relative_path_with_line_num)
+        else:
+            sublime.status_message("Could not find parent git repo. Copied file path: %s" % relative_path_with_line_num)
+        return
+
+    def is_enabled(self):
+        return bool(self.view.file_name() and len(self.view.file_name()) > 0)

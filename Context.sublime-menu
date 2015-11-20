@@ -1,10 +1,4 @@
 [
-
-	{ "command": "insert_file_name", "caption": "Insert File Name" },
-	{ "command": "insert_file_directory", "caption": "Insert File Directory" },
-	{ "command": "insert_file_path", "caption": "Insert File Path" },
-	{ "command": "insert_relative_path", "caption": "Insert Path Relative to Project" },
-	{ "command": "insert_relative_directory", "caption": "Insert Directory Relative to Project" },
-	{ "command": "copy_relative_path", "caption": "Copy File Path Relative to Project" }
-
+  { "command": "copy_relative_path", "caption": "Copy Relative File Path" },
+  { "command": "copy_relative_path_with_line_num", "caption": "Copy File Path With Line Number" }
 ]
