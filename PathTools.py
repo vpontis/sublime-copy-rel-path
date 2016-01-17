@@ -28,6 +28,19 @@ class CopyRelativePathCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
         return bool(self.view.file_name() and len(self.view.file_name()) > 0)
 
+class CopyRelativePathWithTicksCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        relative_path, found = get_relative_path_to_git_repo(self.view.file_name())
+        relative_path_with_ticks = '`%s`' % (relative_path)
+        if found:
+            sublime.set_clipboard(relative_path_with_ticks)
+        else:
+            sublime.status_message("Could not find parent git repo. Copied file path: %s" % relative_path_with_ticks)
+        return
+
+    def is_enabled(self):
+        return bool(self.view.file_name() and len(self.view.file_name()) > 0)
+
 
 class CopyRelativePathWithLineNumCommand(sublime_plugin.TextCommand):
     def run(self, edit):

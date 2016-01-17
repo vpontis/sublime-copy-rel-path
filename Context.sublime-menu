@@ -1,5 +1,6 @@
 [
   { "command": "copy_relative_path", "caption": "Copy Relative File Path" },
+  { "command": "copy_relative_path_with_ticks", "caption": "Copy Relative File Path With Ticks" },
   { "command": "copy_relative_path_with_line_num", "caption": "Copy File Path With Line Number" },
   { "command": "copy_relative_path_with_line_num_and_ticks", "caption": "Copy File Path With Line Number And Ticks" }
 ]
